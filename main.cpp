@@ -113,7 +113,6 @@ int __cdecl main()
     } while (fd == NULL);
     //std::ifstream readFile("Redecorate.mp3");
 
-
     unsigned int devNum = 0;
     wprintf(L"______________________\n");
     wprintf(L"Choose device:\n>");

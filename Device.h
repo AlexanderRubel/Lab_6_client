@@ -9,6 +9,7 @@ public:
     SOCKADDR_BTH pBtSockRemote{};
     char    buffer[4096] = {};
     DWORD   swSize = sizeof(buffer);
+    wchar_t devAddr[100] = {};
 
     Device();
 
