@@ -102,6 +102,7 @@ int __cdecl main()
 
     FILE* fd = NULL;
     do {
+        std::cout << "Enter file name: " << std::endl << '>';
         std::string fName;
         std::cin >> fName;
     
