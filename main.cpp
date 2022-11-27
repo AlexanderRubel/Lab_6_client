@@ -101,18 +101,27 @@ int __cdecl main()
     WSALookupServiceEnd(hLookup);
 
     FILE* fd = NULL;
-    fopen_s(&fd, "Redecorate.mp3", "rb");
-    if (fd == NULL) {
-        printf("Cannot open file.\n");
-        exit(1);
-    }
+    do {
+        std::string fName;
+        std::cin >> fName;
+    
+        fopen_s(&fd, fName.c_str(), "rb");
+        if (fd == NULL) {
+            printf("Cannot open file. Try again\n> ");
+        }
+    } while (fd == NULL);
     //std::ifstream readFile("Redecorate.mp3");
 
 
-    int devNum = 0;
+    unsigned int devNum = 0;
     wprintf(L"______________________\n");
     wprintf(L"Choose device:\n>");
-    std::cin >> devNum;
+    do {
+        std::cin >> devNum;
+        if (devNum >= devices.size()) {
+            wprintf(L"Number is too big. Try again\n> ");
+        }
+    } while (devNum >= devices.size());
 
     /* Run client mode */
     /* Creating SOCKET */
@@ -146,7 +155,7 @@ int __cdecl main()
         if (SOCKET_ERROR == send(localSocket, (char*)buf, (int)lengthRead, 0)) {
             wprintf(L"=CRITICAL= | send() call failed WSAGetLastError=[%d]\n", WSAGetLastError());
         }
-        //Sleep(100);
+        Sleep(1);
     } while (lengthRead > 0);
         
     fclose(fd);
