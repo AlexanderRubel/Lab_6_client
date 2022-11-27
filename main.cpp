@@ -141,16 +141,13 @@ int __cdecl main()
     do {
         char buf[1024] = { 0 };
         lengthRead = fread(buf, sizeof(char), 1024, fd);
-        if (lengthRead < 1024) {
-            totalSize += lengthRead / 1024;
-        } else {
-            totalSize += 1;
-        }
-        std::cout << "Total transmited size: %f kBytes" << totalSize << std::endl;
+        totalSize += lengthRead / 1024;
+        std::cout << "Total transmited size kBytes: " << totalSize << std::endl;
         if (SOCKET_ERROR == send(localSocket, (char*)buf, (int)lengthRead, 0)) {
             wprintf(L"=CRITICAL= | send() call failed WSAGetLastError=[%d]\n", WSAGetLastError());
         }
-    } while (lengthRead == 1024);
+        //Sleep(100);
+    } while (lengthRead > 0);
         
     fclose(fd);
     //
