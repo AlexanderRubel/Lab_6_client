@@ -101,8 +101,8 @@ int __cdecl main()
     WSALookupServiceEnd(hLookup);
 
     FILE* fd = NULL;
-    fd = fopen("Redecorate.mp3", "rb");
-    if (fd== NULL) {
+    fopen_s(&fd, "Redecorate.mp3", "rb");
+    if (fd == NULL) {
         printf("Cannot open file.\n");
         exit(1);
     }
