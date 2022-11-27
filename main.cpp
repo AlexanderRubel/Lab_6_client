@@ -5,15 +5,15 @@
 
 #include <WinSock2.h>
 #include <ws2bth.h>
-
 #include <stdio.h>
-
 #include <iostream>
 #include <vector>
+#include <initguid.h>
 
 #include "Device.h"
 
 #pragma comment(lib, "ws2_32.lib")
+
 DEFINE_GUID(g_guidServiceClass, 0xb62c4e8d, 0x62cc, 0x404b, 0xbb, 0xbf, 0xbf, 0x3e, 0x3b, 0xbb, 0x13, 0x74);
 
 #define CXN_TEST_DATA_STRING              (L"~!@#$%^&*()-_=+?<>1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
