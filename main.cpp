@@ -6,9 +6,13 @@
 #include <WinSock2.h>
 #include <ws2bth.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include <initguid.h>
+#include <fcntl.h>
+//#include <io.h>
 
 #include "Device.h"
 
@@ -16,19 +20,19 @@
 
 DEFINE_GUID(g_guidServiceClass, 0xb62c4e8d, 0x62cc, 0x404b, 0xbb, 0xbf, 0xbf, 0x3e, 0x3b, 0xbb, 0x13, 0x74);
 
-#define CXN_TEST_DATA_STRING              (L"~!@#$%^&*()-_=+?<>1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-#define CXN_TRANSFER_DATA_LENGTH          (sizeof(CXN_TEST_DATA_STRING))
+//#define CXN_TEST_DATA_STRING              (L"~!@#$%^&*()-_=+?<>1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+//#define CXN_TRANSFER_DATA_LENGTH          (sizeof(CXN_TEST_DATA_STRING))
 
 
-#define CXN_BDADDR_STR_LEN                17   // 6 two-digit hex values plus 5 colons
-#define CXN_MAX_INQUIRY_RETRY             3
-#define CXN_DELAY_NEXT_INQUIRY            15
-#define CXN_SUCCESS                       0
-#define CXN_ERROR                         1
-#define CXN_DEFAULT_LISTEN_BACKLOG        4
-wchar_t g_szRemoteName[BTH_MAX_NAME_SIZE + 1] = { 0 };  // 1 extra for trailing NULL character
-wchar_t g_szRemoteAddr[CXN_BDADDR_STR_LEN + 1] = { 0 }; // 1 extra for trailing NULL character
-int  g_ulMaxCxnCycles = 1;
+//#define CXN_BDADDR_STR_LEN                17   // 6 two-digit hex values plus 5 colons
+//#define CXN_MAX_INQUIRY_RETRY             3
+//#define CXN_DELAY_NEXT_INQUIRY            15
+//#define CXN_SUCCESS                       0
+//#define CXN_ERROR                         1
+//#define CXN_DEFAULT_LISTEN_BACKLOG        4
+//wchar_t g_szRemoteName[BTH_MAX_NAME_SIZE + 1] = { 0 };  // 1 extra for trailing NULL character
+//wchar_t g_szRemoteAddr[CXN_BDADDR_STR_LEN + 1] = { 0 }; // 1 extra for trailing NULL character
+//int  g_ulMaxCxnCycles = 1;
 
 int __cdecl main()
 {
@@ -64,17 +68,15 @@ int __cdecl main()
     else
         printf("The Winsock 2.2 dll was found okay\n");
 
-
     /* The Winsock DLL is acceptable. Proceed to use it. */
-
     /* Add network programming using Winsock here */
 
     /* User code starts here */
-    WSAQUERYSET wsaQuery{};
+    WSAQUERYSET wsaQuery{0};
     wsaQuery.dwNameSpace = NS_BTH;
     wsaQuery.dwSize = sizeof(WSAQUERYSET);
     HANDLE hLookup{};
-    DWORD  flags = LUP_CONTAINERS | LUP_FLUSHCACHE | LUP_RETURN_NAME | LUP_RETURN_ADDR;
+    DWORD  flags = LUP_CONTAINERS | LUP_RETURN_NAME | LUP_RETURN_ADDR | LUP_FLUSHCACHE;
 
     if (WSALookupServiceBegin(&wsaQuery, flags, &hLookup) == SOCKET_ERROR) {
         wprintf(L"WSALookupServiceBegin failed with error: %d\n", WSAGetLastError());
@@ -97,6 +99,15 @@ int __cdecl main()
         devices.pop_back();
     }
     WSALookupServiceEnd(hLookup);
+
+    FILE* fd = NULL;
+    fd = fopen("Redecorate.mp3", "rb");
+    if (fd== NULL) {
+        printf("Cannot open file.\n");
+        exit(1);
+    }
+    //std::ifstream readFile("Redecorate.mp3");
+
 
     int devNum = 0;
     wprintf(L"______________________\n");
@@ -123,12 +134,25 @@ int __cdecl main()
         wprintf(L"=CRITICAL= | connect() call failed. WSAGetLastError=[%d]\n", WSAGetLastError());
     }
 
-    char buf[7] = "Hello!";
-    std::cout << "___________________________" << std::endl;
-    if (SOCKET_ERROR == send(localSocket, (char*)buf, (int)7, 0)) {
-        wprintf(L"=CRITICAL= | send() call failed WSAGetLastError=[%d]\n", WSAGetLastError());
-    }
 
+   
+    int lengthRead = 0;
+    float totalSize = 0; //kBytes
+    do {
+        char buf[1024] = { 0 };
+        lengthRead = fread(buf, sizeof(char), 1024, fd);
+        if (lengthRead < 1024) {
+            totalSize += lengthRead / 1024;
+        } else {
+            totalSize += 1;
+        }
+        std::cout << "Total transmited size: %f kBytes" << totalSize << std::endl;
+        if (SOCKET_ERROR == send(localSocket, (char*)buf, (int)lengthRead, 0)) {
+            wprintf(L"=CRITICAL= | send() call failed WSAGetLastError=[%d]\n", WSAGetLastError());
+        }
+    } while (lengthRead == 1024);
+        
+    fclose(fd);
     //
     // Close the socket
     //
